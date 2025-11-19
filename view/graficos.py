@@ -6,7 +6,7 @@ try:
     VISUALIZACION_DISPONIBLE = True
 except ImportError:
     VISUALIZACION_DISPONIBLE = False
-    print("⚠️  matplotlib/seaborn no disponibles. Visualizaciones deshabilitadas.")
+    print("matplotlib/seaborn no disponibles. Visualizaciones deshabilitadas.")
 
 import numpy as np
 

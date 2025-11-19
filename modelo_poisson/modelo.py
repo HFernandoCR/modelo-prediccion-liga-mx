@@ -28,7 +28,52 @@ class ModeloPoissonFutbol:
         """Carga datos históricos desde CSV y devuelve DataFrame."""
         self.datos_originales, self.equipos = prep.cargar_datos_historicos(ruta_csv)
         return self.datos_originales
-    
+
+    def cargar_parametros(self, ruta_csv='parametros_modelo.csv'):
+        import os
+        
+        # Validar existencia del archivo
+        if not os.path.exists(ruta_csv):
+            raise FileNotFoundError(f"Archivo no encontrado: {ruta_csv}")
+        
+        # Leer CSV
+        try:
+            df = pd.read_csv(ruta_csv)
+        except Exception as e:
+            raise ValueError(f"Error al leer CSV: {e}")
+        
+        # Validar columnas necesarias
+        columnas_requeridas = ['Equipo', 'Alpha_Ataque', 'Beta_Defensa', 'Gamma_Local']
+        columnas_faltantes = set(columnas_requeridas) - set(df.columns)
+        if columnas_faltantes:
+            raise ValueError(f"Columnas faltantes en CSV: {columnas_faltantes}")
+        
+        # Extraer parámetros
+        self.equipos = df['Equipo'].tolist()
+        self.alpha = dict(zip(df['Equipo'], df['Alpha_Ataque']))
+        self.beta = dict(zip(df['Equipo'], df['Beta_Defensa']))
+        self.gamma = df['Gamma_Local'].iloc[0]  # Gamma es constante
+        
+        # Marcar como "entrenado" (aunque no se re-entrenó)
+        self.modelo_entrenado = True
+        
+        # Imprimir confirmación
+        imprimir_titulo("PARÁMETROS CARGADOS DESDE CSV")
+        print(f"\n✓ Archivo: {ruta_csv}")
+        print(f"✓ Equipos cargados: {len(self.equipos)}")
+        print(f"✓ Ventaja de local (γ): {self.gamma:.3f}")
+        print(f"  → Equipos locales anotan {(self.gamma-1)*100:.1f}% más goles")
+        
+        print("\n" + "✓" * 35)
+        print("MODELO LISTO PARA PREDICCIONES")
+        print("✓" * 35 + "\n")
+        
+        return {
+            'equipos': len(self.equipos),
+            'gamma': self.gamma,
+            'archivo': ruta_csv
+        }
+
     def entrenar(self):
         """Prepara datos, construye y ajusta el GLM Poisson."""
         if self.datos_originales is None:
