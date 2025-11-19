@@ -1,4 +1,4 @@
-"""Funciones de predicción (goles esperados, matriz y probabilidades)."""
+"""Funciones de predicción (modelo de Poisson)."""
 
 import numpy as np
 from scipy.stats import poisson
@@ -6,7 +6,7 @@ from .utils import validar_equipo, formatear_probabilidad, imprimir_titulo
 
 
 def calcular_goles_esperados(equipo_local, equipo_visitante, alpha, beta, gamma):
-    """Calcula λ_local y λ_visitante a partir de alpha, beta y gamma."""
+    """Calcula λ para local y visitante."""
     lambda_local = alpha[equipo_local] * beta[equipo_visitante] * gamma
     lambda_visitante = alpha[equipo_visitante] * beta[equipo_local]
     
@@ -14,42 +14,38 @@ def calcular_goles_esperados(equipo_local, equipo_visitante, alpha, beta, gamma)
 
 
 def generar_matriz_probabilidades(lambda_local, lambda_visitante, max_goles=5):
-    """Matriz P(i-j) = P_local(i) * P_visitante(j) para 0..max_goles."""
+    """Matriz P(i,j)=P_local(i)*P_visitante(j)."""
     matriz = np.zeros((max_goles + 1, max_goles + 1))
     
     for i in range(max_goles + 1):
         for j in range(max_goles + 1):
-            # P(local anota i goles)
+            # P(local = i)
             prob_local = poisson.pmf(i, lambda_local)
-            
-            # P(visitante anota j goles)
+            # P(visitante = j)
             prob_visitante = poisson.pmf(j, lambda_visitante)
-            
-            # P(marcador i-j) asumiendo independencia
+            # P(marcador i-j) (independencia)
             matriz[i, j] = prob_local * prob_visitante
     
     return matriz
 
 
 def calcular_probabilidades_resultado(matriz):
-    """Calcula P(victoria local), P(empate) y P(victoria visitante)."""
+    """Devuelve P(victoria local, empate, victoria visitante)."""
     # Victoria local: triángulo INFERIOR (i > j)
-    # CORREGIDO: En numpy, tril da posiciones donde fila > columna
+    # triángulo inferior (i>j)
     prob_victoria_local = np.sum(np.tril(matriz, k=-1))
     
-    # Empate: diagonal (i = j)
+    # Empate: diagonal
     prob_empate = np.sum(np.diag(matriz))
     
-
-    # Victoria visitante: triángulo SUPERIOR (j > i, es decir i < j)
-    # CORREGIDO: En numpy, triu da posiciones donde fila < columna
-    prob_victoria_visitante = np.sum(np.triu(matriz, k=-1))
+    # triángulo superior (j>i)
+    prob_victoria_visitante = np.sum(np.triu(matriz, k=1))
     
     return prob_victoria_local, prob_empate, prob_victoria_visitante
 
 
 def encontrar_marcador_mas_probable(matriz):
-    """Devuelve el marcador más probable, su probabilidad e índices."""
+    """Marcador más probable, su probabilidad e índices."""
     indice_max = np.unravel_index(matriz.argmax(), matriz.shape)
     marcador = f"{indice_max[0]}-{indice_max[1]}"
     probabilidad = matriz[indice_max]
@@ -58,7 +54,7 @@ def encontrar_marcador_mas_probable(matriz):
 
 
 def calcular_over_under(matriz, limite=2.5):
-    """Calcula P(total > limite) y P(total <= limite)."""
+    """Probabilidades Over/Under para total de goles."""
     prob_over = 0
     prob_under = 0
     
@@ -76,28 +72,28 @@ def calcular_over_under(matriz, limite=2.5):
 
 def predecir_partido_completo(equipo_local, equipo_visitante, alpha, beta, 
                                gamma, equipos, max_goles=5):
-    """Predicción completa del partido: devuelve diccionario con métricas."""
-    # Validar equipos
+    """Predicción completa: λ, matriz, probabilidades y métricas."""
+    # validar equipos
     validar_equipo(equipo_local, equipos)
     validar_equipo(equipo_visitante, equipos)
     
-    # Calcular goles esperados
+    # calcular λ
     lambda_local, lambda_visitante = calcular_goles_esperados(
         equipo_local, equipo_visitante, alpha, beta, gamma
     )
     
-    # Generar matriz de probabilidades
+    # generar matriz
     matriz = generar_matriz_probabilidades(
         lambda_local, lambda_visitante, max_goles
     )
     
-    # Calcular probabilidades de resultado
+    # probabilidades de resultado
     prob_local, prob_empate, prob_visitante = calcular_probabilidades_resultado(matriz)
     
-    # Encontrar marcador más probable
+    # marcador más probable
     marcador, prob_marcador, indices = encontrar_marcador_mas_probable(matriz)
     
-    # Calcular Over/Under
+    # over/under
     prob_over, prob_under = calcular_over_under(matriz, limite=2.5)
     
     return {
@@ -118,7 +114,7 @@ def predecir_partido_completo(equipo_local, equipo_visitante, alpha, beta,
 
 
 def mostrar_prediccion_formato(prediccion):
-    """Imprime la predicción de forma legible en consola."""
+    """Imprime la predicción en consola."""
     imprimir_titulo(f"PREDICCIÓN: {prediccion['equipo_local']} vs {prediccion['equipo_visitante']}")
     
     print(f"\n GOLES ESPERADOS:")
@@ -153,7 +149,7 @@ def mostrar_prediccion_formato(prediccion):
 
 
 def mostrar_matriz_formateada(matriz):
-    """Imprime la matriz de probabilidades en porcentajes."""
+    """Imprime matriz de probabilidades en porcentaje."""
     filas, cols = matriz.shape
     matriz_pct = matriz * 100  # Convertir a porcentaje
     
@@ -173,7 +169,7 @@ def mostrar_matriz_formateada(matriz):
 
 
 def simular_partido_montecarlo(lambda_local, lambda_visitante, n_simulaciones=1000):
-    """Simulación Monte Carlo; devuelve conteos y porcentajes de resultados."""
+    """Simula partidos por Monte Carlo y devuelve conteos y porcentajes."""
     np.random.seed(42)  # Para reproducibilidad
     
     goles_local = np.random.poisson(lambda_local, n_simulaciones)
