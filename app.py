@@ -48,29 +48,32 @@ def cargar_modelo_preentrenado():
 def entrenar_modelo_nuevo(uploaded_file):
     """
     Entrena modelo desde cero usando CSV subido por usuario.
-    
+
     Parameters
     ----------
     uploaded_file : UploadedFile
         Archivo CSV de Streamlit
-    
+
     Returns
     -------
     tuple
         (modelo, error_msg)
     """
     try:
-        # Guardar archivo temporalmente
-        with open('/tmp/datos_temp.csv', 'wb') as f:
+        # Guardar archivo temporalmente usando el nombre original
+        import os
+        temp_path = os.path.join('/tmp' if os.name != 'nt' else os.getenv('TEMP', '.'), uploaded_file.name)
+
+        with open(temp_path, 'wb') as f:
             f.write(uploaded_file.getvalue())
-        
+
         # Crear y entrenar modelo
         modelo = ModeloPoissonFutbol()
-        modelo.cargar_datos('/tmp/datos_temp.csv')
+        modelo.cargar_datos(temp_path)
         modelo.entrenar()
-        
+
         return modelo, None
-    
+
     except Exception as e:
         return None, str(e)
 
@@ -262,21 +265,21 @@ def main():
     """Función principal de la aplicación."""
     
     # ===== SIDEBAR =====
-    st.sidebar.title("⚽ Liga MX Predictor")
+    st.sidebar.title("Liga MX Predictor")
     st.sidebar.markdown("---")
     
     # Modo de operación
     st.sidebar.subheader("Configuración")
     modo = st.sidebar.radio(
         "Modo de operación:",
-        options=["⚡ Usar modelo pre-entrenado", "Entrenar nuevo modelo"],
+        options=["Usar modelo pre-entrenado", "Entrenar nuevo modelo"],
         index=0
     )
     
     # Inicializar modelo según modo
     modelo = None
     
-    if modo == "⚡ Usar modelo pre-entrenado":
+    if modo == "Usar modelo pre-entrenado":
         # Cargar modelo pre-entrenado
         with st.spinner("Cargando modelo pre-entrenado..."):
             modelo, error = cargar_modelo_preentrenado()
@@ -451,7 +454,7 @@ def main():
                         st.info(" Partido equilibrado")
         
         else:
-            st.info(" Selecciona los equipos y presiona **'🔮 Predecir Resultado'**")
+            st.info(" Selecciona los equipos y presiona **'Predecir Resultado'**")
     
     # ===== TAB 2: RANKINGS =====
     with tab2:
