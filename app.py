@@ -3,6 +3,7 @@ Aplicación Web - Predictor Liga MX
 ===================================
 Interfaz Streamlit para modelo de Poisson.
 
+Autor: Fernando
 Proyecto: TecNM - Simulación
 """
 
@@ -102,7 +103,8 @@ def crear_heatmap_interactivo(matriz, equipo_local, equipo_visitante):
     anotaciones = []
     for i in range(matriz.shape[0]):
         for j in range(matriz.shape[1]):
-            color = 'white' if matriz_pct[i, j] > 7 else 'black'
+            # En escala de verdes: texto blanco para verde oscuro, negro para verde claro
+            color = 'white' if matriz_pct[i, j] > 8 else 'black'
             peso = 'bold' if (i, j) == max_prob_idx else 'normal'
             
             anotaciones.append(
@@ -119,7 +121,7 @@ def crear_heatmap_interactivo(matriz, equipo_local, equipo_visitante):
         z=matriz_pct,
         x=[str(i) for i in range(matriz.shape[1])],
         y=[str(i) for i in range(matriz.shape[0])],
-        colorscale='RdYlGn_r',  # Invertido: rojo=baja, verde=alta
+        colorscale='Greens',  # Verde claro (baja prob) a verde oscuro (alta prob)
         text=[[f'{val:.1f}%' for val in row] for row in matriz_pct],
         texttemplate='%{text}',
         textfont={"size": 11},
@@ -260,21 +262,21 @@ def main():
     """Función principal de la aplicación."""
     
     # ===== SIDEBAR =====
-    st.sidebar.title("Liga MX Predictor")
+    st.sidebar.title("⚽ Liga MX Predictor")
     st.sidebar.markdown("---")
     
     # Modo de operación
     st.sidebar.subheader("Configuración")
     modo = st.sidebar.radio(
         "Modo de operación:",
-        options=["Usar modelo pre-entrenado", "Entrenar nuevo modelo"],
+        options=["⚡ Usar modelo pre-entrenado", "Entrenar nuevo modelo"],
         index=0
     )
     
     # Inicializar modelo según modo
     modelo = None
     
-    if modo == "Usar modelo pre-entrenado":
+    if modo == "⚡ Usar modelo pre-entrenado":
         # Cargar modelo pre-entrenado
         with st.spinner("Cargando modelo pre-entrenado..."):
             modelo, error = cargar_modelo_preentrenado()
@@ -287,6 +289,34 @@ def main():
     
     else:  # Entrenar nuevo modelo
         st.sidebar.info("Sube un archivo CSV con datos históricos")
+        
+        # Botón para descargar plantilla
+        st.sidebar.markdown("##### Plantilla CSV")
+        st.sidebar.markdown("Descarga la plantilla para saber cómo estructurar tus datos:")
+        
+        # Leer plantilla
+        plantilla_csv = """Date,HomeTeam,AwayTeam,FTHG,FTAG
+        2023-07-15,Club America,Cruz Azul,2,1
+        2023-07-16,Tigres UANL,Monterrey,1,1
+        2023-07-17,Guadalajara Chivas,Atlas,3,0
+        2023-07-18,Pachuca,Club Leon,2,2
+        2023-07-19,Toluca,Santos Laguna,1,0
+        2023-07-20,UNAM Pumas,Queretaro,2,1
+        2023-07-21,Puebla,Necaxa,0,0
+        2023-07-22,Mazatlan FC,Club Tijuana,1,2
+        2023-07-23,Atl. San Luis,Juarez,2,0
+        2023-07-24,Monarcas,Veracruz,3,1"""
+        
+        st.sidebar.download_button(
+            label="Descargar Plantilla CSV",
+            data=plantilla_csv,
+            file_name="plantilla_liga_mx.csv",
+            mime="text/csv",
+            help="CSV de ejemplo con la estructura correcta"
+        )
+        
+        st.sidebar.markdown("---")
+        
         uploaded_file = st.sidebar.file_uploader(
             "Selecciona archivo CSV:",
             type=['csv'],
@@ -360,7 +390,7 @@ def main():
             
             with col1:
                 st.metric(
-                    label=f"{equipo_local}",
+                    label=f" {equipo_local}",
                     value=f"λ = {prediccion['lambda_local']:.2f}",
                     help="Goles esperados del equipo local"
                 )
@@ -369,14 +399,14 @@ def main():
                 marcador = prediccion['marcador_mas_probable']
                 prob_marcador = prediccion['prob_marcador_mas_probable']
                 st.metric(
-                    label="Marcador Más Probable",
+                    label=" Marcador Más Probable",
                     value=f"{marcador} ({prob_marcador*100:.1f}%)",
                     help="Resultado con mayor probabilidad"
                 )
             
             with col3:
                 st.metric(
-                    label=f"{equipo_visitante}",
+                    label=f" {equipo_visitante}",
                     value=f"λ = {prediccion['lambda_visitante']:.2f}",
                     help="Goles esperados del equipo visitante"
                 )
@@ -384,7 +414,7 @@ def main():
             st.markdown("---")
             
             # Gráfico de barras (probabilidades)
-            st.subheader("Probabilidades del Resultado")
+            st.subheader(" Probabilidades del Resultado")
             fig_barras = crear_grafico_barras(
                 prediccion['prob_victoria_local'],
                 prediccion['prob_empate'],
@@ -393,7 +423,7 @@ def main():
             st.plotly_chart(fig_barras, use_container_width=True)
             
             # Heatmap
-            st.subheader("Matriz de Probabilidades (Todos los Marcadores)")
+            st.subheader(" Matriz de Probabilidades (Todos los Marcadores)")
             fig_heatmap = crear_heatmap_interactivo(
                 prediccion['matriz_probabilidades'],
                 equipo_local,
@@ -402,7 +432,7 @@ def main():
             st.plotly_chart(fig_heatmap, use_container_width=True)
             
             # Información adicional
-            with st.expander("Ver análisis detallado"):
+            with st.expander(" Ver análisis detallado"):
                 col_a, col_b = st.columns(2)
                 
                 with col_a:
@@ -414,23 +444,23 @@ def main():
                 with col_b:
                     st.write("**Interpretación:**")
                     if prediccion['lambda_local'] > prediccion['lambda_visitante']:
-                        st.success(f"{equipo_local} es favorito")
+                        st.success(f" {equipo_local} es favorito")
                     elif prediccion['lambda_local'] < prediccion['lambda_visitante']:
-                        st.error(f"{equipo_visitante} es favorito")
+                        st.error(f" {equipo_visitante} es favorito")
                     else:
-                        st.info("Partido equilibrado")
+                        st.info(" Partido equilibrado")
         
         else:
-            st.info("Selecciona los equipos y presiona **'Predecir Resultado'**")
+            st.info(" Selecciona los equipos y presiona **'🔮 Predecir Resultado'**")
     
     # ===== TAB 2: RANKINGS =====
     with tab2:
-        st.subheader("Rankings de la Liga MX")
+        st.subheader(" Rankings de la Liga MX")
         
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown("### Ranking de Ataque (α)")
+            st.markdown("###  Ranking de Ataque (α)")
             ranking_ataque = modelo.obtener_ranking_ataque()
             st.dataframe(
                 ranking_ataque[['Ranking', 'Equipo', 'Alpha']].rename(columns={'Alpha': 'Fuerza Ataque'}),
@@ -439,7 +469,7 @@ def main():
             )
         
         with col2:
-            st.markdown("### Ranking de Defensa (β)")
+            st.markdown("###  Ranking de Defensa (β)")
             ranking_defensa = modelo.obtener_ranking_defensa()
             st.dataframe(
                 ranking_defensa[['Ranking', 'Equipo', 'Beta']].rename(columns={'Beta': 'Fuerza Defensa'}),
@@ -448,14 +478,14 @@ def main():
             )
         
         st.markdown("---")
-        st.info("Nota: En defensa, valores menores = mejor defensa")
+        st.info(" **Nota:** En defensa, valores menores = mejor defensa")
     
     # ===== TAB 3: INFO DEL MODELO =====
     with tab3:
-        st.subheader("Información del Modelo")
+        st.subheader(" Información del Modelo")
         
         # Parámetros del modelo
-        st.markdown("### Parámetros del Modelo")
+        st.markdown("###  Parámetros del Modelo")
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
@@ -483,7 +513,7 @@ def main():
         
         # Explicación del modelo
         st.markdown("---")
-        st.markdown("### ¿Cómo funciona el Modelo de Poisson?")
+        st.markdown("###  ¿Cómo funciona el Modelo de Poisson?")
         
         st.write("""
         El modelo utiliza **Regresión de Poisson** para predecir los goles en un partido de fútbol.
@@ -508,7 +538,7 @@ def main():
         
         # Referencias
         st.markdown("---")
-        st.markdown("### Referencias Académicas")
+        st.markdown("###  Referencias Académicas")
         st.write("""
         - **Dixon, M. J., & Coles, S. G. (1997).** "Modelling association football scores 
           and inefficiencies in the football betting market". *Applied Statistics*, 46(2), 265-280.
