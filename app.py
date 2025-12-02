@@ -26,6 +26,39 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# =====================================================================
+# CSS PERSONALIZADO - TRADUCCION AL ESPANOL
+# =====================================================================
+
+st.markdown("""
+<style>
+    /* Traducir file uploader a espanol */
+    [data-testid="stFileUploaderDropzone"] div div::before {
+        content: "Arrastra y suelta tu archivo aqui";
+    }
+    [data-testid="stFileUploaderDropzone"] div div span {
+        display: none !important;
+    }
+    [data-testid="stFileUploaderDropzone"] small {
+        visibility: hidden;
+        position: relative;
+    }
+    [data-testid="stFileUploaderDropzone"] small::after {
+        content: "Limite 200MB por archivo - CSV";
+        visibility: visible;
+        position: absolute;
+        left: 0;
+    }
+    [data-testid="stFileUploaderDropzone"] button {
+        font-size: 0;
+    }
+    [data-testid="stFileUploaderDropzone"] button::after {
+        content: "Explorar archivos";
+        font-size: 14px;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 
 # =====================================================================
 # FUNCIONES HELPER
@@ -79,9 +112,7 @@ def entrenar_modelo_nuevo(uploaded_file):
 
 
 def crear_heatmap_interactivo(matriz, equipo_local, equipo_visitante):
-    """
-    Crea heatmap interactivo con Plotly.
-    
+    """    Crea heatmap interactivo con Plotly.
     Parameters
     ----------
     matriz : numpy.ndarray
