@@ -2,9 +2,9 @@
 
 Modelo de Regresión de Poisson para predecir resultados de partidos de fútbol basado en Dixon & Coles (1997).
 
-**Autor:** Fernando
+**Autores:** Hector, Daniel, Uriel
 **Proyecto:** TecNM - Campus Oaxaca | Simulación
-**Año:** 2024
+**Año:** 2025
 
 ---
 
@@ -38,14 +38,33 @@ Python 3.8+
 
 ## Instalación
 
+### Requisitos Previos
+
+Verifica que tengas Python 3.8 o superior instalado:
+
+```bash
+python --version
+# o en algunos sistemas:
+python3 --version
+```
+
+Si no tienes Python instalado, descárgalo desde [python.org](https://www.python.org/downloads/)
+
+---
+
 ### 1. Clonar o descargar el repositorio
 
 ```bash
-git clone <url-del-repositorio>
+git clone https://github.com/HFernandoCR/modelo-prediccopm-liga-mx.git
 cd modelo-prediccopm-liga-mx
 ```
 
-### 2. Crear entorno virtual (recomendado)
+### 2. Crear entorno virtual (IMPORTANTE)
+
+Es **fundamental** usar un entorno virtual para:
+- Evitar conflictos con otras versiones de librerías en tu sistema
+- Mantener las dependencias del proyecto aisladas
+- Garantizar que el proyecto funcione correctamente
 
 **Windows:**
 ```powershell
@@ -59,11 +78,43 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 
+**Verificación:** Después de activar, deberías ver `(venv)` al inicio de tu línea de comandos:
+```
+(venv) C:\Users\...\modelo-prediccopm-liga-mx>
+```
+
 ### 3. Instalar dependencias
+
+Con el entorno virtual **activado**, instala las dependencias:
 
 ```bash
 pip install -r requirements.txt
 ```
+
+### 4. Verificar instalación
+
+Verifica que todo se instaló correctamente:
+
+```bash
+pip list
+```
+
+Deberías ver paquetes como: `pandas`, `numpy`, `streamlit`, `statsmodels`, `plotly`, etc.
+
+**Prueba rápida:**
+```bash
+python -c "import streamlit, pandas, statsmodels; print('✓ Instalación exitosa')"
+```
+
+### 5. Desactivar entorno virtual (cuando termines)
+
+Cuando hayas terminado de trabajar con el proyecto:
+
+```bash
+deactivate
+```
+
+Esto te regresa a tu entorno Python normal. Para volver a trabajar en el proyecto, simplemente reactiva el entorno con el comando del paso 2.
 
 ---
 
@@ -415,15 +466,6 @@ Ranking  Equipo              Beta
 
 ---
 
-## Contacto y Contribuciones
-
-**Autor:** Fernando
-**Institución:** TecNM - Campus Oaxaca
-**Curso:** Simulación
-
-Para reportar bugs o sugerir mejoras, favor de contactar al autor o crear un issue en el repositorio.
-
----
 
 ## Licencia
 
