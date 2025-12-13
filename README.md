@@ -381,6 +381,18 @@ Ranking  Equipo              Beta
 
 ---
 
+## Video de Demostración
+
+> **[Ver video completo en Google Drive](https://drive.google.com/file/d/1uUBmX_DafaqtpT0YhSbXM9D529yJRdZu/view?usp=drive_link)**
+> 
+> El video muestra el funcionamiento completo del sistema:
+> - Predicciones con modelo pre-entrenado
+> - Entrenamiento con datos personalizados
+> - Visualizaciones interactivas
+> - Interpretación de resultados
+
+---
+
 ## Mejoras Futuras
 
 - [ ] Integrar ventaja de visitante diferenciada por equipo
