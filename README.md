@@ -5,7 +5,8 @@ Modelo de Regresión de Poisson para predecir resultados de partidos de fútbol 
 **Autores:** 
 - Hector Fernando Cruz Ruiz
 - José Daniel Rodriguez Juárez
-- Uriel Zarate Díaz
+- Uriel Díaz Zarate
+  
 **Proyecto:** TecNM - Campus Oaxaca | Simulación
 **Año:** 2025
 
