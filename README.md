@@ -2,7 +2,10 @@
 
 Modelo de Regresión de Poisson para predecir resultados de partidos de fútbol basado en Dixon & Coles (1997).
 
-**Autores:** Hector, Daniel, Uriel
+**Autores:** 
+- Hector Fernando Cruz Ruiz
+- José Daniel Rodriguez Juárez
+- Uriel Zarate Díaz
 **Proyecto:** TecNM - Campus Oaxaca | Simulación
 **Año:** 2025
 
